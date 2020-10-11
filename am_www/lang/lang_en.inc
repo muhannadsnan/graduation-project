@@ -1,0 +1,148 @@
+<?php
+define("PROJECT_TITLE","Al Soofi Company");
+define("Main","Home");
+define("News","News");
+define("About","Resume");
+define("OurAccounts","Our Accounts");
+define("Locations","Locations");
+define("JoinUs","Join Us");
+define("Gallery","Gallery");
+define("ContactUs","Contact Us");
+define("Comments", "Comments");
+define("GuestBook","Guest Book");
+define("Albumi","Albums");
+define("Services","Services");
+define("Re-Type","Re-Type ");
+define("MailList","Mail List");
+define("Members_Login","Members Login");
+define("Downlods","Downloads");
+define("Products","Products");
+define("Categories","Categories");
+define("Adv","Adv");
+define("Send","إرسال");
+define("Links","Links");
+define("insrt_ur_eml","Type Your Email Here");
+
+define("Type0","Latest News");
+define("Type1","Info Pages");
+define("SendEnquery","Send Enquiry");
+define("Tenders","Tenders");
+
+define("Back","Back");
+define("Back_to_home","Back to Home");
+define("user_name","Username");
+define("password","Password");
+define("sign_in","sign in");
+define("log_in","Log In");
+define("Edit","Edit");
+define("Delete","Delete");
+define("nowandate", date("Y-m-d H:i:s"));
+define("curdatetime", date("d-m-Y H:i:s"));
+define("date", date("Y-m-d"));
+define("delete_question", "Are you sure want delete this item: %s ؟");
+define("Save", "Save");
+define("more","More");
+define("NID","ID");
+define("Hidden","Hidden");
+define("LastUpdate","Last Update");
+define("NDate","Last Update");
+define("Visits","Visited");
+define("lang","Language");
+define("Related_Pages","Related Pages");
+define("admin_controls","Admin Controls");
+define("Related_Links","Usefull Links");
+define("Visitors","Visits");
+define("up","Up");
+define("Home","Home");
+define("Remove_Pic","Remove Image");
+
+define("NotVerified", "Sorry! Please enter correct verification code below.");
+define("CannotResize", "Can not resize the uploded photo!");
+define("ErrFileType", "Invalid File Type!");
+define("CannotUpload", "Uploading Failed!");
+define("ReRegistered", "Your registeration re-enabled! Thanks!");
+define("CancelRegister", "Registeratin Canceld!");
+define("RegisteredOK", "Welcome! Regitered Successfully.");
+define("RowDeleted", "Deleted Successfully!");
+define("DBOK", "Saved Successfully!");
+define("DataSent", "Data was sent, Thank you!");
+define("DBERR", "Sorry!! An unexpected error occured..please try again later!");
+define("FillAllRequierd", "Please fill in all required fields (*) !");
+define("FillAll", "Please fill in all fields!");
+define("DataIsExist", "Data was found!");
+define("IsNotRegistered", "Sorry you are not registered!");
+define("Uploded", "Uploded Successfully");
+define("InvalidTel", "Please enter a valid <u>telphone</u> number! only digits are allowed.");
+define("InvalidMob", "Please enter a valid <u>fax</u> number! only digits are allowed.");
+define("InvalidFax", "Please enter a valid <u>mobile</u> number! only digits are allowed.");
+define("InvalidMail", "Please enter a valid <u>email</u>!");
+define("log_in","Log In");
+
+define("CannotMasking", "Cannot Create Mask!");
+define("NotVerified", "Please enter the correct displayed code!");
+define("CannotResize", "Cannot resize the image!");
+define("ErrFileType", "Invalid File Type!");
+define("CannotUpload", "File uploade error!");
+define("ReRegistered", "شكراً لك! تم إعادة تفعيل إشتراكك بنجاح..");
+define("CancelRegister", "تم إلغاء إشتراكك بنجاح! شكراً لك.");
+define("RegisteredOK", "شكراً لك! تم تسجيلك بنجاح...");
+define("RowDeleted", "Deleted successfully!");
+define("DBOK", "Saved successfully!");
+define("DBERR", "Sorry! error in writing to database please try again...");
+define("FillAllRequierd", "Please fill all elements (*) !");
+define("FillAll", "Please fill all elements!");
+define("DataIsExist", "Date is exist....please enter another data!");
+define("IsNotRegistered", "Sorry! you are not registered yet....");
+define("Uploded", "File uploded successfully!");
+define("Commented", "Thank you! Your message was sent successfully.");
+define("InvalidTel", "Wrong tel number..");
+define("InvalidMob", "Wrong mobile number..");
+define("InvalidFax", "Wrong fax number..");
+define("InvalidMail", "Wrong email address");
+define("You_can_contact_us_directly_by_filling_this_application", "You can contact us directly by filling in this application!");
+
+
+define("v_delete_question", "Are you sure want to delete comment: %s ؟");
+define("Hide","Hide");
+define("Show","Show");
+define("Visitor_Name","Visitor Name");
+define("Visitor_EMail","E-Mail");
+define("View_Orig_Page","Source Page");
+
+define("yes","yes");
+define("no","no");
+define("read_more","Read more");
+define("Verification","Verification");
+define("This_helps_us_to_prevent_automatic_registration","Please enter the displayed character below(case insensitive)");
+define("Please_enter_the_string_shown_in_the_image_above","");
+define("VComment_Text","Comment Text");
+define("Set_Def_Pix","Select default image");
+define("Search","Search");
+define("AdvSearch","Advanced Search");
+define("GuestBook","Visit book");
+
+//NAVIGATOR >>>>>>>>>>>>>>>
+define("dir", "ltr");
+define("align","left");
+define("r_align","right");
+define("Next", "Next");
+define("Last", "Last");
+define("First", "First");
+define("Previous", "Previous");
+define("rows_found", "Result");
+define("Page", "Page");
+define("of", "of");
+//END NAVIGATOR <<<<<<<<<<<
+
+define("Products_Menu","Products List");
+define("b_pg","About Products");
+define("c_pg","Components");
+define("d_pg","Products Uses");
+define("e_pg","Proucts Features");
+define("f_pg","Products Codes");
+define("g_pg","Nominal Current");
+define("Edit_Tree","Edit Tree");
+define("SYR","Syrian Arab Repulic - Ministry of Industry");
+
+define("Ads_NStart","Start Date");
+define("Ads_NEnd","End Date");

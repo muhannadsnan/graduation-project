@@ -1,0 +1,12 @@
+﻿UL.jqueryFileTree {padding: 0px;margin: 0px;direction:rtl;text-align:right;font-size: 9pt;line-height:17px;}
+UL.jqueryFileTree LI {list-style: none;padding: 0px;padding-right: 20px;margin:10px 0px;white-space: normal;}
+UL.jqueryFileTree A {color: #333;text-decoration: none;display: block;padding: 0px 2px;}
+UL.jqueryFileTree A:hover {background: #BDF;}
+
+/* Core Styles */
+.jqueryFileTree LI.directory { background: url(images/directory.png) right top no-repeat; }
+.jqueryFileTree LI.expanded { background: url(images/folder_open.png) right top no-repeat; }
+.jqueryFileTree LI.file { background: url(images/file.png) right top no-repeat; }
+.jqueryFileTree LI.wait { background: url(images/spinner.gif) right top no-repeat; }
+
+.jqueryFileTree LI.ext_folder { background: url(images/directory.png) right top no-repeat; }
