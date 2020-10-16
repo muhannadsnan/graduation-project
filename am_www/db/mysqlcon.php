@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 'on');
 session_start();
 //declare global variables
 global $con;
@@ -8,7 +10,7 @@ global $lang;
 
 
 require_once '../db/settings.php';
-$conA=new mysql_connection_A();
+$conA=new mysqli_connection_A();
 $con=$conA->do_connect();
 
 //MYSQL DB Functions________________________________________________________________________
@@ -19,7 +21,7 @@ function cmd($sql, $db="con"){
 //if it was a deleting statement, return an appropriate message of deleting or query succeeding  or else an error message
  
 	//echo $sql;
-	if (mysql_query($sql, $GLOBALS[$db])) {
+	if (mysqli_query($sql, $GLOBALS[$db])) {
 		if (eregi("^delete", $sql)){
 			return $GLOBALS['MyErrStr']->RowDeleted;
 		}else {
@@ -34,7 +36,7 @@ function table($sql, $db="con"){
 
 // executes an sql query and returns result rows as table 
 	//echo $sql;
-	$res=mysql_query($sql, $GLOBALS[$db]);
+	$res=mysqli_query($sql, $GLOBALS[$db]);
 	if ($res) {
 		return $res;
 	}else {
@@ -45,9 +47,9 @@ function table($sql, $db="con"){
 function row($sql, $db="con"){
 
 //returns a single result row according to an sql statement
-	$res=mysql_query($sql, $GLOBALS[$db]);
+	$res=mysqli_query($sql, $GLOBALS[$db]);
 	if ($res) {
-		return mysql_fetch_array($res);
+		return mysqli_fetch_array($res);
 	}else {
 		return false;
 	}	
@@ -56,9 +58,9 @@ function row($sql, $db="con"){
 function get_data_in($search_sqlstatement,$dfname, $db="con"){
 
 //returns a single data cell according to an sql statement
-	$xres=mysql_query( "$search_sqlstatement", $GLOBALS[$db]);
+	$xres=mysqli_query( "$search_sqlstatement", $GLOBALS[$db]);
 	if ($xres) {
-		$xrow=mysql_fetch_array($xres);
+		$xrow=mysqli_fetch_array($xres);
 		$requierd_data=$xrow["$dfname"];
 		return $requierd_data;
 	}else {
@@ -245,5 +247,5 @@ class ErrStr
 	}
 }
 
-}
+
 ?>
