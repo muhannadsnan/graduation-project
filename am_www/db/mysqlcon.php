@@ -1,21 +1,23 @@
 <?php
 session_start();
+//declare global variables
 global $con;
 global $MyErrStr;
 global $wwwURL;
 global $lang;
- 
+
+
 require_once '../db/settings.php';
 $conA=new mysql_connection_A();
 $con=$conA->do_connect();
 
-$cc_arr=array('','#005ba0','#2ba25b','#da251c');
-$cc_arrC=array('blue','blue','green','red');
-		
-	
-//MYSQL DB Functions___________________________________________________________________________________________________________________________________________________
+//MYSQL DB Functions________________________________________________________________________
 
 function cmd($sql, $db="con"){
+
+//cmd means 'COMMAND'. This function executes an sql query that does not have results to return
+//if it was a deleting statement, return an appropriate message of deleting or query succeeding  or else an error message
+ 
 	//echo $sql;
 	if (mysql_query($sql, $GLOBALS[$db])) {
 		if (eregi("^delete", $sql)){
@@ -29,6 +31,8 @@ function cmd($sql, $db="con"){
 }
 
 function table($sql, $db="con"){
+
+// executes an sql query and returns result rows as table 
 	//echo $sql;
 	$res=mysql_query($sql, $GLOBALS[$db]);
 	if ($res) {
@@ -39,6 +43,8 @@ function table($sql, $db="con"){
 }
 
 function row($sql, $db="con"){
+
+//returns a single result row according to an sql statement
 	$res=mysql_query($sql, $GLOBALS[$db]);
 	if ($res) {
 		return mysql_fetch_array($res);
@@ -48,6 +54,8 @@ function row($sql, $db="con"){
 }
 
 function get_data_in($search_sqlstatement,$dfname, $db="con"){
+
+//returns a single data cell according to an sql statement
 	$xres=mysql_query( "$search_sqlstatement", $GLOBALS[$db]);
 	if ($xres) {
 		$xrow=mysql_fetch_array($xres);
@@ -58,101 +66,42 @@ function get_data_in($search_sqlstatement,$dfname, $db="con"){
 	}
 }
 
-function data_is_exists($search_sqlstatement, $db="con"){
-	//echo $search_sqlstatement;
-	$inquireres=mysql_query("$search_sqlstatement", $GLOBALS[$db]);
 
-	/*if (mysql_num_rows($inquireres)>0) { return true;}
-    else {	return false;}*/
-}
+
+
 
 function get_month_name($mid)
 {
+//returns the month's name by it's order
 	$maaa=array('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December');
 	return $maaa[$mid-1];
 }
 
-function Reverse_date($date, $speartor="-"){
-	$dt=explode($speartor, strval($date));
-	$dt=array_reverse($dt);
-	$dt=join("-", $dt);
-	return $dt;
-	//return $date;
-}
+//Admin Functions___________________________________________________________________________
 
-//CP Functions_________________________________________________________________________________________________________________________________________________________
+function showedit($lnk, $showTXT=false, $tttxt="Edit", $users=array("A")){//print_r($users);
 
-function showedit($lnk, $showTXT=false, $tttxt="Edit", $users=array("A")){
+//displays a tool to enable the user do edit operation, if he had full control permission "A" or the class's managing permission.
 	if (!$showTXT) {$tttxt="";}
 	if (user_has_permission($users)) {
-		return  '<a class="edit_tool" href="'.$lnk.'"><img style="border:0px" src="../images/edtimg.png" alt="Edit" /> <span>'.$tttxt.'</span></a>';
+		return  '<a class="edit_tool_ico" href="'.$lnk.'"><img style="" src="../images/edtimg.png" alt="Edit" /> <span>'.$tttxt.'</span></a>';
 	}
 	return false;
 }
 
-function showdelet($lnk, $showTXT=false, $tttxt="Delete", $users=array("A")){
+function showdelet($lnk, $showTXT=false, $tttxt="Delete", $users=array("A")){//print_r($users);
+
+//displays a tool to enable the user do delete operation, if he had full control permission "A" or the class's managing permission.
 	if (!$showTXT) {$tttxt="";}
 	if (user_has_permission($users)) {
-		return  '<a  class="edit_tool" href="'.$lnk.'"><img style="border:0px" src="../images/dltimg.png" alt="Delete" /> <span>'.$tttxt.'</span></a>';
+		return  '<a  class="edit_tool_ico" href="'.$lnk.'"><img style="" src="../images/dltimg.png" alt="Delete" /> <span>'.$tttxt.'</span></a>';
 	}
 	return false;
-}
-
-function showview_details($lnk, $showTXT=false, $tttxt="View", $users=array("A"), $showicon=true, $icon="", $lnkTarget="", $extra_class=""){
-	if (!$showTXT) {$tttxt="";}
-	if($icon =="") 
-		$icon="../images/vewdt.gif";
-	if ($showicon) {	
-		$micon='<img style="border:0px" src="'.$icon.'" alt="- " />';
-	}
-	if (user_has_permission($users)) {
-		return  '<a  class="edit_tool '.$extra_class.'" href="'.$lnk.'" target="'.$lnkTarget.'">'.$micon.' <span>'.$tttxt.'</span></a>';
-	}
-	return false;
-}
-
-function showview_admin_details($lnk, $editLink, $deleteLink, $showTXT=false, $tttxt="View", $users=array("A"), $showicon=true, $icon="", $lnkTarget=""){
-	if (!$showTXT) {$tttxt="";}
-	if($icon =="") 
-		$icon="../images/vewdt.gif";
-	if ($showicon) {	
-		$micon='<img style="border:0px" src="'.$icon.'" alt="View Details" />';
-	}
-	if (user_has_permission($users)) {
-		return  '<a  class="edit_tool" href="'.$lnk.'" target="'.$lnkTarget.'">'.$micon.' '.'</a>'.$deleteLink.' '.$editLink.'<a  class="edit_tool" href="'.$lnk.'" target="'.$lnkTarget.'">'.$tttxt.'</a>';
-	}
-	return false;
-}
-
-function showview_list($lnk, $showTXT=false, $tttxt="View", $users=array("A"), $showicon=true){
-	if (!$showTXT) {$tttxt="";}
-	if ($showicon) {
-		$micon='<img style="border:0px" src="../images/vewlst.png" alt="View List" />';
-	}
-	if (user_has_permission($users)) {
-		return  '<a  class="edit_tool" href="'.$lnk.'">'.$micon.' '.$tttxt.'</a>';
-	}
-	return false;
-}
-
-function show_views_nom($Nom=0, $users=array("N")){
-	if (user_has_permission($users)) {
-		return '<span>Views: </span><span>'.$Nom.'</span>'; 
-	}
-	return false;
-}
-
-function gen_str($str, $arr)
-{
-	//if (!is_array($arr)) return;
-	foreach ($arr as $k=>$v) {
-		$str=str_ireplace('{'.$k.'}', $v, $str);
-	}
-	return $str;
 }
 
 function get_pms()
 {
+//collects the GET parameters and join them as a single string var
 	foreach ($_GET as $pmk => $pmv) {
 		if ($pmk!="v" && $pmk!="lang" && $pmk!="NID" && $pmk!="noframe"){
 		$strpms[]=$pmk."=".$pmv;	
@@ -163,74 +112,40 @@ function get_pms()
 }
 ////////USER PERMISSION//////////////////////////////////////
 function user_has_permission($users_types){
+
+//this is the most important function in terms of permissions.
+//it checkes whether the user is logged in, and has one or more permissions in his session array variable of privileges
+
 	if (in_array("N", $users_types)) {
 			return true;
 	}
-	if (session_is_registered("UID")) {
-		if (in_array($_SESSION["UTP"], $users_types)) {
-			return true;
+
+	if (session_is_registered("GID") && $_SESSION["PRIVS"]) {
+		foreach ($_SESSION["PRIVS"] as $priv)
+			if (in_array($priv, $users_types)) {
+				return true;
 		}
 	}
 	return false;
 }
 
-function IS_LOGGED_IN(){
-	if (!user_has_permission(array("A","B"))){@header("location:../common/signin.php?soro=x"); exit();}
+
+
+function IS_SECURE($priv=""){
+
+//and this is the second most important one. If makes sure that the user is logged in and has enough permissions to continue on this page, and priv "A" (full control) is checked also. However, if the user does not have and, we force to leave the page and redirect him to the signin page
+	$p=array();
+	$p[0]="A";
+	$p[1]=$priv;
+	if (!user_has_permission($p)){@header("location:../common/signin.php?soro=x"); exit();}
 }
 
-function RemCrLf($subject,$delimiter="")
-{
-	$newstring = preg_replace("/[\n\r]/",$delimiter,$subject);
-	$newstring = str_ireplace("{$delimiter}{$delimiter}","{$delimiter}",$newstring);
-	return $newstring;
-}
-
-function get_script_file_name(){
-	$str=$_SERVER['PHP_SELF'];
-	$arr=array_reverse(explode('/',$str));
-	return $arr[0];
-}
-
-function AXFlash($id, $src, $width, $height, $alt="", $attr="", $stretch=false, $bg="transparent", $wmode="transparent"){
-	if(!$GLOBALS['$AXFLASHCHECER_LOADED']){
-		?><script src="../cms/flashchecker.js" language="javascript"></script><?php
-		$GLOBALS['AXFLASHCHECKR_LOADED']=true;
-	}
-	
-	?>
-	<script language="JavaScript" type="text/javascript">
-	var requiredMajorVersion = 10;
-	var requiredMinorVersion = 0;
-	var requiredRevision = 0;
-	
-	var hasReqestedVersion = DetectFlashVer(requiredMajorVersion, requiredMinorVersion, requiredRevision);
-	if (hasReqestedVersion) {
-		document.getElementById("<?=$id?>").innerHTML = '<embed src="<?=$src?>" wmode="<?=$wmode?>" quality="high" bgcolor="<?=$bg?>" width="<?=$width?>" height="<?=$height?>" name="ad-banner1" align="middle" allowScriptAccess="always" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" style="float: middle" <?php if ($stretch) echo 'scale="ExactFit"' ?> <?=$attr?> />';
-	}
-	else {
-		<?php if ($alt!=""){ ?>
-		document.getElementById("<?=$id?>").innerHTML = '<?=$alt?>';
-		<?php } ?>
-	}
-	</script>
-	<?php	
-}
-//NDT_______________________________________________________________________________________________________________
-
-class NDT
-{
-	static function BlogName($id)
-	{
-		$res=get_data_in("select BName from Btbl where BID = '{$id}'","BName");
-		return $res;
-	}
-}
-
-//Error Alerts_______________________________________________________________________________________________________________________________________
-
+//Error Alerts__________________________________________________________________________________
 $MyErrStr=new ErrStr();
 class ErrStr
 {
+//these variables are very clear and can explain every thing about this class to know it's contents
+//the error messages returnd by db and others, will find a match here and will be displayed as a formatted message div that has CSS class to modify
 	public $CannotMasking=-10;
 	public $NotVerified=-9;
 	public $CannotResize=-8;
@@ -255,7 +170,6 @@ class ErrStr
 	
 	function Show($ErrStrHandle){
 		//Use these two varibles to format message
-		//استخدم هذين المتغيرين لتحديد تنسيق الرسالة
 		$strstyle='<div class="err_msg">';
 		$strendstyle="</div>";
 		$exc='<img class="err_msg_icon" src="../images/exs.gif" />';
@@ -331,80 +245,5 @@ class ErrStr
 	}
 }
 
-//AJAX__________________________________________________________________________________________________________________________________________________________________
-
-function decode_unicode_url($str)
-{
-  $res = '';
-
-  $i = 0;
-  $max = strlen($str) - 6;
-  while ($i <= $max)
-  {
-    $character = $str[$i];
-    if ($character == '%' && $str[$i + 1] == 'u')
-    {
-      $value = hexdec(substr($str, $i + 2, 4));
-      $i += 6;
-
-      if ($value < 0x0080) // 1 byte: 0xxxxxxx
-      {$character = chr($value);}
-      else if ($value < 0x0800) // 2 bytes: 110xxxxx 10xxxxxx
-      {$character =
-            chr((($value & 0x07c0) >> 6) | 0xc0)
-          . chr(($value & 0x3f) | 0x80);}
-      else // 3 bytes: 1110xxxx 10xxxxxx 10xxxxxx
-      {$character =
-            chr((($value & 0xf000) >> 12) | 0xe0)
-          . chr((($value & 0x0fc0) >> 6) | 0x80)
-          . chr(($value & 0x3f) | 0x80);}
-    }
-    else
-      $i++;
-
-    $res .= $character;
-  }
-
-  return $res . substr($str, $i);
-}
-
-function url_pms($exclude_arr){
-	foreach ($_GET as $pmk => $pmv) {
-		if (!in_array($pmk, $exclude_arr)){
-		$strpms[]=$pmk."=".urlencode($pmv);	
-		}
-	}
-	$strpms=@join("&",$strpms);
-	return ($strpms);
-}
-
-class MT
-{
-	public static function get_BCountry($BCID)
-	{
-		$rval=get_data_in("select CName from bcountries where BCID = '{$BCID}'","CName");
-		return $rval;
-	}
-	
-	public static function get_BCountry_BID($BID)
-	{
-		$rval=get_data_in("select bcountries.CName as CName from brands inner join bcountries on brands.BCID=bcountries.BCID where brands.BID = '{$BID}'","CName");
-		return $rval;
-	}
-	
-	public static function get_Flag($BCID)
-	{
-		include_once '../obj/bcountry.class.php';
-		$myFlag=new BCountry($BCID);
-		return $myFlag->Draw_Photo($myFlag->BCPic,"thumb");
-	}
-	
-	public static function get_Flag_Path($BCID)
-	{
-		include_once '../obj/bcountry.class.php';
-		$myFlag=new BCountry($BCID);
-		return $myFlag->get_file_path($myFlag->BCPic,"thumb");
-	}
-	
 }
 ?>

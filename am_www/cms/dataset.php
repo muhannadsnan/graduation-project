@@ -1,26 +1,40 @@
 <?php
-//Ver. 2.6 Last editing in DARALNAWADER Project
-require_once '../db/mysqlcon.php';
+
+require_once '../db/mysqlcon.php'; //call pages of communicating with database
+include_once '../common/pframe.php'; //call pages of user defined functions
+$myfr=new pframe();
 class JSDataSet
 {
+
+// Dataset attibutes
 	public $NID="NONE";
 	public $NTitle="NONE";
 	public $tblname="";
 	public $documents_path="../documents/";
 	public $thumbs_path="../documents/thumbs/";
 	
-	function __construct($DID="new")
-	{	
+
+//class constructor, automatically called when a new object is defined $x=new classx()
+	function __construct($DID="IsNew")
+	{	//bringing class attributes from the x.class.php file
+             // attribute name of the ID atrribute
 		foreach (get_class_vars(get_class($this)) as $varn) {$varn=$this->$varn['name'];if (is_array($varn) && in_array($varn['type'], array('ID'))) {$this->NID=&$this->$varn['name'];}}
 		foreach (get_class_vars(get_class($this)) as $varn) {$varn=$this->$varn['name'];if (is_array($varn) && $varn['istitle']==true) {$this->NTitle=&$this->$varn['name'];}} 
 	
-		if ($DID=="new") {
-			$this->NID['value']=uniqid();
+//if the GET parameter 'NID'was empty, then it takes the values IsNew automatically, and then:
+		if ($DID=="IsNew") {
+			$this->NID['value']=uniqid();//hex unique ID
 			$this->NID['IsNew']=true;
-			$this->onStart($DID); 
+			$this->onStart($DID); //trigger the event onStart()
 			return;
 		}
-		
+
+//if the GET parameter 'NID'=add_existing (this is in the 'download' page)		
+		if ($DID=="add_existing") {
+			$this->onStart($DID);
+		}
+
+//bring records related to that NID parameter		
 		$sql="select * from $this->tblname where ".$this->NID['name']." = '$DID'";
 		$my_row=row($sql, "con");
 		
@@ -28,20 +42,25 @@ class JSDataSet
 			$this->FillIn($my_row,false);
 		}else {
 			//Row not found
+				
 			$this->NID['value']=$DID;
 			$this->NID['IsNew']=true; 
 		}
 		
 		$this->onStart($DID);
 	}
+/*****************************************  END OF FUNCTION   ***************************************/
+
 	
-	function FillIn($arr,$chk_is_new=true)
+	function FillIn($arr,$chk_is_new=true) //fills a query result into an x object 
 	{
 		//Fields
 		foreach (get_class_vars(get_class($this)) as $varn) {
+//bring class's attributes
 			$strtr=$varn['name'];
 			$mano=&$this->$strtr;
-			if (is_array($varn)) {
+			if (is_array($varn)) { 
+//and these attributes has many types	
 				if (in_array($varn['type'], array('varchar', 'char', 'text')))
 				{
 					$mano['value']=stripslashes($arr[$varn['name']]);
@@ -53,31 +72,36 @@ class JSDataSet
 			}
 		}
 		if ($chk_is_new) {
+ //if this id already exists in db
 			$chk=get_data_in("select count(".$this->NID['name'].") as chk from {$this->tblname} where {$this->NID['name']} = '{$this->NID['value']}' ","chk");
-			if ($chk>0) {$this->NID['IsNew']=false;} else {$this->NID['IsNew']=true;}
+			if ($chk>0) {$this->NID['IsNew']=false;           //Not new} 
+                                else {$this->NID['IsNew']=true;             //is new}
 		}
 		$this->onStart($this->NID['value']);
 	}
+/*****************************************  END OF FUNCTION   ***************************************/
 		
-	function UpdateRow()
+	function UpdateRow()    //data updating operation
 	{
-		$this->onBeforeUpdate();
+		$this->onBeforeUpdate();    //trigger the onBefore event
 		
 		$MyErrStr=new ErrStr();
 		
+//check validity according to the class VALIDATION attributes 
 		if (!$this->chk_required()) {return $MyErrStr->FillAllRequierd;}
 		if (!$this->validate_values()) {return $MyErrStr->InvalidMail;}
 		if (!$this->validate_password()) {return $MyErrStr->ReTypePassword;}
 	 	if (!$this->chk_is_unique(true)) {return $MyErrStr->DataIsExist;}
 	 	
 	 	
-		$upres=$this->do_uploads();
+		$upres=$this->do_uploads();        //upload 'file' if exist
 		if ($upres!=$MyErrStr->Uploded) {return $upres;}
 		
-		foreach (get_class_vars(get_class($this)) as $varn) {
+		foreach (get_class_vars(get_class($this)) as $varn) {      //manipulating class attributes
 			$varn=$this->$varn['name'];
 			if (is_array($varn) && in_array($varn['type'], array('file', 'ID'))==false) {
 				
+//if type is one of these
 				if (in_array($varn['type'], array('varchar', 'char', 'text')))
 				{
 					$parms[]=$varn['name']."='".addslashes($varn['value'])."'";
@@ -85,52 +109,55 @@ class JSDataSet
 					$parms[]=$varn['name']."='".$varn['value']."'";
 				}
 			}
-			if ($varn['type']=='file') {
+			if ($varn['type']=='file') {     //if file 
 				$parms[]=$varn['name']."='".$varn['ftype']."'";
 			}
-			if ($varn['type']=='password') {
+			if ($varn['type']=='password') {     //if password
 				$parms[]=$varn['name']."=md5('".$varn['value']."')";
 			}	
 		}
 		$sql="update {$this->tblname} set ".join(",",$parms)." where {$this->NID['name']} = '{$this->NID['value']}'";
-		//echo $sql;
+//execute the update sql query according to this row
 		$res = cmd($sql, "con");
 		if ($res==$MyErrStr->DBOK){$this->Index_Record();}
-		$this->onUpdate($res);
+		$this->onUpdate($res); //trigger onUpdate event
 		return $res;
 	}
+/*****************************************  END OF FUNCTION   ***************************************/
 	
-	function InsertRow()
+	function InsertRow()      //data inserting operation 
 	{
-		$this->onBeforeInsert();
+		$this->onBeforeInsert();     //trigger event previous to inserting
 		
-		if ($this->NID['value']=='' || $this->NID['value']==null){
+		if ($this->NID['value']=='' || $this->NID['value']==null || $this->NID['value'] == "IsNew"){
 			$this->NID['value']=uniqid();
+      //generate new hex unique id if the NID is empty|IsNew
 		}
-		
+
+//check validity according to the class VALIDATION attributes		
 		$MyErrStr=new ErrStr();
 		if (!$this->chk_required()) {return $MyErrStr->FillAllRequierd;}
 		if (!$this->validate_values()) {return $MyErrStr->InvalidMail;}
 		if (!$this->validate_password()) {return $MyErrStr->ReTypePassword;}
 		if (!$this->chk_is_unique()) {return $MyErrStr->DataIsExist;}
 	
-		$upres=$this->do_uploads();
+		$upres=$this->do_uploads();     //upload 'file' if exists
 		if ($upres!=$MyErrStr->Uploded) {return $upres;}
-		foreach (get_class_vars(get_class($this)) as $varn) {
+		foreach (get_class_vars(get_class($this)) as $varn) {    //manipulating class attributes
 			$strvar=$varn['name'];
 			$varn=$this->$strvar;
-			if (is_array($varn)) {	
+			if (is_array($varn)) {	//if type is one of these
 				if (in_array($varn['type'], array('varchar', 'char', 'text', 'ID')))
 				{
 					$parmsA[]=$varn['name'];
 					$parmsB[]="'".addslashes($varn['value'])."'";
-				}elseif (in_array($varn['type'], array('file'))){
+				}elseif (in_array($varn['type'], array('file'))){ //type=file
 					$parmsA[]=$varn['name'];
 					$parmsB[]="'".$varn['ftype']."'";
-				}elseif (in_array($varn['type'], array('password'))){
+				}elseif (in_array($varn['type'], array('password'))){ //type=password
 					$parmsA[]=$varn['name'];
 					$parmsB[]="md5('".$varn['value']."')";
-				}elseif (in_array($varn['type'], array('Auto_Nom'))) {
+				}elseif (in_array($varn['type'], array('Auto_Nom'))) {//type=autonum
 					if ($varn['value']=="") {
 					$lastone=get_data_in("select ifnull(max( cast({$varn['name']} as decimal) ),0) as nn from {$this->tblname}","nn");
 					$lastone+=1;
@@ -147,20 +174,22 @@ class JSDataSet
 			}
 		}
 
+//execute the insert sql query according to this row
 		$sql="insert into $this->tblname (".join(", ",$parmsA).") values (".join(", ",$parmsB).")";
 
 		$res = cmd($sql, "con");
 		if ($res==$MyErrStr->DBOK){$this->Index_Record();}
-		$this->onInsert($res);
+		$this->onInsert($res);//trigger event
 		//echo $sql;
 		return $res;
 	}
-	
+/*****************************************  END OF FUNCTION   ***************************************/
+
 	function RemoveRow()
 	{
-		$this->onBeforeRemove();
+		$this->onBeforeRemove();//trigger event
 		
-		foreach (get_class_vars(get_class($this)) as $varn) {
+		foreach (get_class_vars(get_class($this)) as $varn) {//bring class attribs
 			$varn=$this->$varn['name'];
 			if (is_array($varn) && in_array($varn['type'], array('file'))) {
 				@unlink("{$this->documents_path}{$varn['prefix']}{$this->NID['value']}.{$varn['ftype']}");
@@ -173,14 +202,16 @@ class JSDataSet
 		}
 		$sql="DELETE FROM $this->tblname WHERE ".$this->NID['name']." like '".$this->NID['value']."'";
 
-		$res = cmd($sql, "con");
+		$res = cmd($sql, "con");//execute the delete sql query according to this row
 		if ($res=$GLOBALS['MyErrStr']->RowDeleted){$this->Remve_Row_Index();}
 		$this->onRemove($res);
 		return $res;
 	}
+/*****************************************  END OF FUNCTION   ***************************************/
 	
 	function chk_required()
 	{
+//check the attribute 'required' foreach field in the class to prevent add an empty value
 		foreach (get_class_vars(get_class($this)) as $varn) {
 			$varn=$this->$varn['name'];
 			if (is_array($varn) && in_array($varn['type'], array('file'))==false) {
@@ -193,9 +224,11 @@ class JSDataSet
 		}
 		return true;
 	}
+/*****************************************  END OF FUNCTION   ***************************************/
 	
 	function chk_is_unique($old=false)
 	{
+//check the attribute 'unique' foreach field in the class to prevent add existing value
 		foreach (get_class_vars(get_class($this)) as $varn) {
 			$varn=$this->$varn['name'];
 			if (is_array($varn) && in_array($varn['type'], array('file'))==false) {
@@ -208,9 +241,11 @@ class JSDataSet
 		}
 		return true;
 	}
+/*****************************************  END OF FUNCTION   ***************************************/
 	
 	function validate_values()
 	{
+//perform validation operations for each field in the class according to validation type of each
 		foreach (get_class_vars(get_class($this)) as $varn) {
 			$varn=$this->$varn['name'];
 			if (is_array($varn) && in_array($varn['type'], array('file'))==false) {
@@ -242,33 +277,14 @@ class JSDataSet
 				
 				}
 			}
-/*
-			if ($varn['control']=='xmlarea'){
-				$def_arr=$this->xml_fields_parser($varn['default']);
-				$val_arr=$this->xml_fields_parser($varn['value']);
-				if (is_array($def_arr)){
-				foreach ($def_arr as $def_ctrl) {
-					$val_ctrl=$val_arr[$def_ctrl['name']];
-					$def_ctrl['name']="fld_".$strdtr['name']."[".$def_ctrl['name']."]";
-					$def_ctrl['value']=$val_ctrl['value'];
-					
-				if ($def_ctrl['validate']=="float")
-				{
-					
-					//if (!is_float($def_ctrl['value'])) return false;
-				}
-					
-				}
-				}
-			} */
 		}
-		
-		
 		return true;
 	}
+/*****************************************  END OF FUNCTION   ***************************************/
 	
 	function validate_password()
 	{
+//Password Validation opration: not null or empty 
 		foreach (get_class_vars(get_class($this)) as $varn) {
 			$varn=$this->$varn['name'];
 			if (is_array($varn) && in_array($varn['control'], array('password'))) {
@@ -281,19 +297,21 @@ class JSDataSet
 		}
 		return true;
 	}
+/*****************************************  END OF FUNCTION   ***************************************/
 	
 	function do_uploads()
 	{
+//files uploading operation with considering: path and resize(for photos). +triggering upload events
 		foreach (get_class_vars(get_class($this)) as $varn) {
 			$varf=&$this->$varn['name'];
 			if (is_array($varf) && $varf['type']=='file') {
 			if ($varf['value']['name']!=""){
-			include_once("../cms/upload.php");
+			include_once("../cms/upload.php");//call file include uploads functions
 			$ures=upload_my_file($this->documents_path, $varf['value'], $varf['prefix'].$this->NID['value'], $varf['filetypes']);
 				if ($ures==$GLOBALS['MyErrStr']->Uploded) {
 					$varf['ftype']=Get_File_type($varf['value']['name']);
 					
-					//TRIGGER ONUPLOAD EVENT
+//TRIGGER ONUPLOAD EVENT
 					$this->onUpload("{$this->documents_path}{$varf['prefix']}{$this->NID['value']}.{$varf['ftype']}");
 					
 					if ($varf['resize']){
@@ -302,7 +320,7 @@ class JSDataSet
 						if ($size['mask']){
 							if (!merg_two_pics("{$this->thumbs_path}/{$size['p']}{$varf['prefix']}{$this->NID['value']}.{$varf['ftype']}", $size['mask'], "{$this->thumbs_path}/{$size['p']}{$varf['prefix']}{$this->NID['value']}.{$varf['ftype']}")) {return $GLOBALS['MyErrStr']->CannotResize;}
 						}
-						//TRIGGER ONRESIZE
+//TRIGGER ONRESIZE
 						$this->onResize($size,"{$this->thumbs_path}/{$size['p']}{$varf['prefix']}{$this->NID['value']}.{$varf['ftype']}");
 						}
 					}
@@ -314,101 +332,32 @@ class JSDataSet
 		}
 		return $GLOBALS['MyErrStr']->Uploded;
 	}
+/*****************************************  END OF FUNCTION   ***************************************/
 
 	function More_DVNom()
 	{
+// increase the number of views or visits for the object has called this
 		$this->NVNom['value']++;
-		cmd("update {$this->tblname} set {$this->NVNom['name']} = '{$this->NVNom['value']}' where {$this->NID['name']} = '{$this->NID['value']}'");
+		cmd("update {$this->tblname} set {$this->NVNom['name']} = '{$this->NVNom['value']}' where {$this->NID['name']} = '{$this->NID['value']}' ");
 	}
-
-	function xml_fields_parser($xmlstr, $constant_cap=true)
-	{
-		$ccc=new XMLReader();
-		if (trim($xmlstr)=="") return "";
-		$xmlstr = RemCrLf($xmlstr,"|||||");
-		$ccc->XML($xmlstr);
-		while ($ccc->read()){
-			$ccc_name=$ccc->getAttribute("name");
-			if (!$ccc_name==""){
-			$arr[$ccc_name]['name']=$ccc->getAttribute("name");
-			if ($constant_cap){
-				$arr[$ccc_name]['caption']="xml_{$ccc_name}_cap";
-				if (!defined("xml_{$ccc_name}_cap")){
-				define("xml_{$ccc_name}_cap", $ccc->getAttribute("caption"));}
-			}else{
-				$arr[$ccc_name]['caption']=$ccc->getAttribute("caption");
-			}
-			$arr[$ccc_name]['value']=str_ireplace("|||||", "\n\r", $ccc->getAttribute("value"));
-			$arr[$ccc_name]['type']=$ccc->getAttribute("type");
-			$arr[$ccc_name]['control']=$ccc->getAttribute("control");
-			$arr[$ccc_name]['required']=$ccc->getAttribute("required");
-			$arr[$ccc_name]['permission']=$ccc->getAttribute("permission");
-			$arr[$ccc_name]['sumview']=$ccc->getAttribute("sumview");
-			$arr[$ccc_name]['datatype']=$ccc->getAttribute("datatype");
-			if ($arr[$ccc_name]['datatype']==1) {
-				$arr[$ccc_name]['validate']="float";
-			}
-			$arr[$ccc_name]['note']=str_ireplace("|||||", "\n\r", $ccc->getAttribute("note"));
-			$arr[$ccc_name]['grp']=str_ireplace("|||||", "\n\r", $ccc->getAttribute("grp"));
-			$arr[$ccc_name]['vtype']=$ccc->getAttribute("vtype");
-			if ($arr[$ccc_name]['control']=="list"){
-				$full_options=explode("|||||",$ccc->getAttribute("options"));
-				if (isset($options)) {unset($options);}
-				$n=0;
-				foreach ($full_options as $opt) {
-					if ($arr[$ccc_name]['vtype'] == "i") $cindex=$n; else $cindex=$opt; 
-					if ($constant_cap){
-						if (!defined("xml_{$ccc_name}_opt_{$n}")) {define("xml_{$ccc_name}_opt_{$n}",$opt);} 
-						$options[$cindex]="xml_{$ccc_name}_opt_{$n}";
-					}else {
-						$options[$cindex]=$opt;
-					}
-					$n++;
-				}
-				$arr[$ccc_name]['options']=$options;
-			}
-			}
-		}
-		return $arr;
-	}
-	
-	function xml_fields_composer($values_arr, $xmldef)
-	{
-		$def_arr=$this->xml_fields_parser($xmldef, false);
-		if (!is_array($def_arr)) return "";
-		$xmlstr="<root>";
-		foreach ($def_arr as $defrow) {
-			$defrow['value']=$values_arr[$defrow['name']];
-			$xmlstr.="<fld";
-			foreach ($defrow as $kname=>$vval)
-			{
-				if (in_array($kname,array('name','value'))) {
-				if (is_array($vval)) {$vval=implode(PHP_EOL,$vval);}
-				$xmlstr.=" {$kname}=\"{$vval}\"";
-				}
-			}
-			$xmlstr.=" />";
-		}
-		$xmlstr.="</root>";
-		return $xmlstr;
-	}
+/*****************************************  END OF FUNCTION   ***************************************/
 	
 	function Index_Record()
 	{
+//this function inserts a record in the indexing table to make search faster
+
 		if ($this->IndexView==null || $this->IndexView=="") {return;}
 		$SrchID=uniqid("SR");
 		$TopicID=$this->NID['value'];
 		
 		foreach (get_class_vars(get_class($this)) as $varn) {
+//cheching the class attribs: fkey, all types, istitle
 			$strvar=$varn['name'];
 			$varn=$this->$strvar;
 			if (is_array($varn)) {	
 				if (in_array($varn['type'], array('varchar', 'char', 'text')))
 				{
 					if ($varn['control']=='fkey'){$fldtext=get_data_in("select {$varn['fTitle']} from {$varn['ftbl']} where {$varn['fID']} like '{$varn['value']}'", "{$varn['fTitle']}");}
-					elseif ($varn['control']=='xmlarea') {
-						$xml_arr=$this->xml_fields_parser($varn['value'],false);
-						$fldtext="";
 						foreach ($xml_arr as $xml_fld){
 							$fldtext.=$xml_fld['caption'].": ".$xml_fld['value']." - ";
 						}
@@ -427,7 +376,8 @@ class JSDataSet
 		}
 		$NDate=date("Y-m-d H:i:s");
 		$tbl=$this->tblname;
-		
+
+//insert/update after checking existance		
 		$is_update=data_is_exists("select SrchID from indextbl where TopicID like '$TopicID' and tbl like '$tbl'");
 		if ($is_update){
 			$sql="update indextbl set Topic = '$Topic', TopicText = '$TopicText', NDate = '$NDate', IndexView='$this->IndexView' where TopicID like '$TopicID' and tbl like '$tbl'";
@@ -437,14 +387,18 @@ class JSDataSet
 
 		return cmd($sql, "con");
 	}
+/*****************************************  END OF FUNCTION   ***************************************/
 	
 	function Remve_Row_Index()
 	{
+//removing and index from index table
 		$sql="delete from indextbl where TopicID like '$this->NID['value']' and tbl like '$this->tblname'";
 	}
+/*****************************************  END OF FUNCTION   ***************************************/
 	
 	function get_file_path($fld, $size="")
 	{ 
+//returns the file path according to the attribute prefix & sizes in the class
 		$fext=$fld['ftype'];
 		if ($size=="")
 		{
@@ -454,9 +408,11 @@ class JSDataSet
 		} 
 		return $fp;
 	}
+/*****************************************  END OF FUNCTION   ***************************************/
 	
 	function get_file_path_def($fld, $size="", $extension="jpg")
 	{ 
+//returns the default file path for a given extention
 		$fext=$extension;
 		if ($size=="")
 		{
@@ -466,25 +422,30 @@ class JSDataSet
 		} 
 		return $fp;
 	}
+/*****************************************  END OF FUNCTION   ***************************************/
 	
 	function Draw_Photo($fld, $size="", $def_ext="jpg", $href="", $target="")
 	{
+// an object calls this function, ex.$myProduct->Draw_Photo(…), so it draws HTML emelents + javascript including the object's photo according to it's ID
 		if (file_exists($this->get_file_path($fld, $size)))
 		{
+			$news_title = $this->{'news_title_'.$GLOBALS['lang']}['value'];
 			if ($href=="") {$_href=$this->get_file_path($fld, "");$class='class="lightwindow"';} else {$_href=$href;$class='';}
 		$html_pic = <<<IMG
-		<div class="card_img_div"><a href="{$_href}" target="{$target}" {$class} rel="gallery-plants" title="{$this->NTitle['value']}"><img class="card_img" src="{$this->get_file_path($fld, $size)}" /></a></div>
+		<div  class="card_img_div"><a href="{$_href}" target="{$target}" {$class} rel="gallery-plants" title="{$news_title}"}><img class="card_img" src="{$this->get_file_path($fld, $size)}" /></a></div>
 IMG;
 		}elseif (file_exists($this->get_file_path_def($fld, $size))) {
 		$html_pic = <<<IMG
-		<div class="card_img_div"><a href="{$_href}" target="{$target}" class="lightwindow" rel="gallery-plants" title="{$this->NTitle['value']}"><img class="card_img" src="{$this->get_file_path_def($fld, $size)}" /></a></div>
+		<div  class="card_img_div"><a href="{$_href}" target="{$target}" class="lightwindow" rel="gallery-plants" title="{$news_title}"><img class="card_img" src="{$this->get_file_path_def($fld, $size)}" /></a></div>
 IMG;
 		}
 		return $html_pic;
 	}
+/*****************************************  END OF FUNCTION   ***************************************/
 	
 	function RemoveFile($fld="all")
 	{
+//unlinking + removing a file attached to an object ex. A photo of a product, so the field with a type=file becomes empty and the attached file be deletes
 		if ($this->NID['IsNew']) return;
 		//Find File Fields
 		if ($fld=="all")
@@ -516,115 +477,41 @@ IMG;
 		
 		//Update Data
 		$fldn=$fld['name'];
-		$this->{$fldn}['value']="";
-		
+		$this->{$fldn}['value']="";		
 		}
 		
 		//Apply Changes
 		$this->UpdateRow();	
 	}
+/*****************************************  END OF FUNCTION   ***************************************/
 	
 	function DisplayEditor($lblstyle="", $ShowVerificationCode=0, $btn_txt=Save, $action_filename="")
 	{
+//calls the function that draws Editor, this happens in 'Inserting' & 'Updating' Cases.
 		include_once '../cms/editor.php';
 		DisplayEditor($this, $this->NID['value'], $lblstyle, $ShowVerificationCode, $btn_txt, $action_filename);
 	}
+/*****************************************  END OF FUNCTION   ***************************************/
 	
 	function DisplayUploadDef($lblstyle="")
 	{
+// calls the function that draws Uploading Editor, this happens in 'Inserting' & 'Updating' Cases.
 		include_once '../cms/editor.php';
 		DisplayUploadDef($this, $this->NID['value'], $lblstyle);
 	}
-	
-	function DisplayTable($cols, $sql, $showediting=false, $wherest, $joinlink="", $joinparam="", $jointtls="", $con="con")
+/*****************************************  END OF FUNCTION   ***************************************/
+
+	function DisplayDelMsg($delete_what="")
 	{
-		include_once '../cms/table.php';
-		DisplayTable($cols, $this, $sql, $showediting,$wherest,$joinlink,$joinparam,$jointtls, $con);
-	}
-	
-	function DisplayDelMsg()
-	{
+//when we choose to delete an object, this displays the delete message with the name of that object, you choose between YES/NO, it acts according to your choise with deleting it or not
 		include_once '../cms/delrow.php';
-		DisplayDelMsg($this, $this->NID['value']);
+		DisplayDelMsg($this, $this->NID['value'], $delete_what);
 	}
-	
-	function listview()
-	{
-		echo "<table class='lv'>";
-		foreach (get_class_vars(get_class($this)) as $varn) {
-				if (!is_array($varn)) {continue;}
-				$thecol=$this->{$varn['name']};
-				if ($thecol['control']=='none') {continue;}
-				if ($thecol['view']=='none') continue;
-				
-				echo "<tr><td class='lv_cap'>".@constant($thecol['caption']).": </td><td>";
-				
-				if (in_array($thecol['type'], array('varchar', 'char', 'text', 'ID', 'int', 'datetime', 'bool', 'float')))
-				{
-					if (in_array($thecol['control'], array('fkey'))){
-						if ($thecol['showkey']){$thefkey=$thecol['value'];}
-						echo "<td> {$thefkey} - ".get_data_in("select {$thecol['fTitle']} from {$thecol['ftbl']} where {$thecol['fID']} like '{$thecol['value']}' ", $thecol['fTitle'])."</td>";
-					}elseif (in_array($thecol['control'], array('list'))){
-							echo "<td>".constant($thecol['options'][$thecol['value']])."</td>";
-					}elseif (in_array($thecol['control'], array('checkbox'))){
-							if ($thecol['value']=="1"){$chkme="checked='checked'"; }else {$chkme = '';}
-							echo "<td><input type='checkbox' $chkme /></td>";
-					}else{
-							echo "<td>".nl2br($thecol['value'])."</td>";
-					}
-				}elseif (in_array($thecol['type'], array('file')) && in_array($thecol['view'], array('image'))){
-					if ($thecol['resize']==true)
-					{
-						echo '<td><img src="'.$this->thumbs_path.$thecol['sizes']['thumb']['p'].$thecol['prefix'].$this->NID['value'].".".$thecol['ftype'].'" /></td>';
-					}else {
-						echo "<td><img src=\"{$this->documents_path}{$thecol['prefix']}{$this->NID['value']}.{$thecol['ftype']}\" /></td>";
-					}
-				}elseif (in_array($thecol['type'], array('file')) && $thecol['view']=='link'){
-					echo "<td><a href=\"../cms/download.php?fpath={$this->documents_path}{$thecol['prefix']}{$this->NID['value']}.{$thecol['ftype']}&fname=".urlencode($this->NTitle['value'])."\">".View."</a></td>";
-				}
-				
-				echo "</td></tr>";
-		}
-		echo "</table>";
-	}
-	
-	function fetch_comments()
-	{
-		include_once '../cms/navigator.php';
-		if (!user_has_permission(array("A")))
-		{
-			$showhidden="and NHidden = false";
-		}else {
-			if ($_GET['hidcomnt']){cmd("update vcomments set NHidden=true where VID like '{$_GET['hidcomnt']}'");}
-			if ($_GET['showcomnt']){cmd("update vcomments set NHidden=false where VID like '{$_GET['showcomnt']}'");}
-		}
-		$vcur=$_GET['cur_page'];
-		$cnav=new Navigator("select * from vcomments where vNID like '{$this->NID['value']}' and NTable like '{$this->tblname}' {$showhidden} order by NDate desc", $vcur, 10);
-		while ($crow=mysql_fetch_array($cnav->result))
-		{
-			if (user_has_permission(array("A"))) $vem='<span> | '.$crow['EMail'].'</span>';
-			$HTMLROW='<div class="vcomment"><span class="vcomment_name">'.stripslashes($crow['Name']).':</span> '.stripslashes(nl2br($crow['Comment'])).'<div class="vcomment_date">'.$crow['NDate'].$vem.'</div>';
-			if (user_has_permission(array("A"))){
-				if ($crow['NHidden']){$toHide=Show;$HidVar="showcomnt";}else {$toHide=Hide;$HidVar="hidcomnt";}
-				$HTMLROW.='<div class="vcomment_controls">'.
-			showview_details("{$_SERVER['PHP_SELF']}?{$HidVar}={$crow['VID']}&lang={$GLOBALS['lang']}&NID={$_GET['NID']}&v={$_GET['v']}&cur_page={$_GET['cur_page']}",true,$toHide,array("N"))." | ".
-			showdelet("../cms/vcomment.php?NID={$crow['VID']}&lang={$GLOBALS['lang']}&v=d&prev=".urlencode($_SERVER['PHP_SELF']."?NID={$this->NID['value']}&lang={$GLOBALS['lang']}&v={$_GET['v']}"),true,Delete,array("N"))
-			.'</div>';
-			}
-			$HTMLROW.='</div>';
-			echo $HTMLROW;
-		}
-		//4.Draw navigator line
-		echo '<div class="page_nav_div" style="margin-bottom:30px;">';
-		$cnav->Draw_Navigator_Line("v={$_GET['v']}&NID={$_GET['NID']}".$strpms);
-		echo "</div>";
-		?>
-		<iframe id="IVComments" class="IVComments" name="IVComments" frameborder="0" scrolling="no" src="../cms/vcomment.php?v=e&NID=new&lang=<?=$GLOBALS['lang']?>&ntbl=<?=$this->tblname?>&vnid=<?=$this->NID['value']?>">Your browser does not support inline frames or is currently configured not to display inline frames.</iframe> 
-		<?
-	}
-	
+/*****************************************  END OF FUNCTION   ***************************************/
+		
 	function RemoveRows($filter)
 	{
+//deletes rows according to a 'where' filter clause.
 		$tbl=table("select * from {$this->tblname} where $filter");
 		while ($row=mysql_fetch_array($tbl))
 		{
@@ -632,49 +519,13 @@ IMG;
 			$this->RemoveRow();	
 		}	
 	}
-	
-	function DisplayCards()
-	{
-		
-	}
+/*****************************************  END OF FUNCTION   ***************************************/
+
 /***EVENTS>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>***/
-	function onStart()
-	{
-		return;
-	}
-	
-	function onBeforeInsert()
-	{
-		
-	}
-	
-	function onInsert($res)
-	{
-		return;
-	}
-	
-	function onBeforeUpdate()
-	{
-		
-	}
-	
-	function onUpdate($res)
-	{
-		return;
-	}
-	
-	function onBeforeRemove()
-	{
-		
-	}
-	
-	function onRemove($res)
-	{
-		return;
-	}
 	
 	function onUserInsertedRow($res, &$ShowForm, &$NID)
 	{
+//triggers on inserting a data row
 		echo($GLOBALS['MyErrStr']->Show($res));
 		$ShowForm=true;
 		$NID="new";
@@ -682,34 +533,16 @@ IMG;
 	
 	function onUserUpdatedRow($res, &$ShowForm, &$NID)
 	{
+//triggers on updating a data row
 		echo($GLOBALS['MyErrStr']->Show($res));
 		$ShowForm=true;
 	}
 
 	function onUserRemovedRow($res)
 	{
+//triggers on deleting a data row
 		if ($res==$GLOBALS['MyErrStr']->DBOK)  $res=$GLOBALS['MyErrStr']->RowDeleted; 
 		echo $GLOBALS['MyErrStr']->show($res);
-	}
-	
-	function onUpload($path)
-	{
-		return;
-	}
-	
-	function onResize($size,$path)
-	{
-		return;
-	}
-	
-	function onRenderStart()
-	{
-		return;
-	}
-	
-	function onRenderComplete()
-	{
-		return;
 	}
 }
 ?>

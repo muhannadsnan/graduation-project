@@ -1,5 +1,5 @@
 <?php
-define("PROJECT_TITLE","التعميمات");
+define("PROJECT_TITLE","أم آند أي للبرمجيات");
 define("Main","البداية");
 define("News","الأخبار");
 define("About","عن الشركة");
@@ -15,13 +15,13 @@ define("Categories","التصنيفات");
 define("Adv","الإعلانات");
 define("Links","روابط مفيدة");
 define("Maintenance","طلب صيانة");
-
+ 
 define("Back","عودة");
 define("Back_to_home","عودة إلى الرئيسية");
 define("user_name","اسم المستخدم");
 define("password","كلمة المرور");
-define("Re-Type","أعد كتابة ");
-define("sign_in","تسجيل دخول");
+define("Re-Type","أعد كتابة");
+define("Sign_in","تسجيل دخول");
 define("Edit","تحرير");
 define("Delete","حذف");
 define("nowandate", date("Y-m-d H:i:s"));
@@ -52,28 +52,91 @@ define("admin_controls","لوحة التحكم");
 define("Downlods","قسم التحميل");
 define("Yes","نعم");
 define("No","لا");
-define("insrt_ur_eml","ادخل بريدك الالكتروني هنا");
-//////////////////////////////////////////////////////////////////////////////////////////////////
-define("Control_panel","لوحة التحكم");
-define("Show_data","عرض البيانات");
+define("insrt_ur_eml","اشترك بالقائمة البريدية");
+ 
+ 
+define("Visitor_EMail","البريد الإلكتروني");
+ 
+define("CannotMasking", "فشل في إنشاء القناع!");
+define("NotVerified", "يرجى إدخال الرمز بشكل صحيح أدناه!");
+define("CannotResize", "فشل في تغيير حجم الصورة!");
+define("ErrFileType", "Invalid File Type!");
+define("CannotUpload", "خطأ أثناء رفع الملف!");
+define("ReRegistered", "شكراً لك! تم إعادة تفعيل إشتراكك بنجاح..");
+define("CancelRegister", "تم إلغاء إشتراكك بنجاح! شكراً لك.");
+define("RegisteredOK", "شكراً لك! تم تسجيلك بنجاح...");
+define("RowDeleted", "تم الحذف بنجاح!");
+define("DBOK", "تم حفظ البيانات بنجاح!");
+define("DBERR", "نأسف لحصول خطأ غيرمتوقع أثناء الكتابة إلى قاعدة البيانات! يرجى إعادة المحاولة لاحقاً...");
+define("FillAllRequierd", "يجب إدخال جميع الحقول المطلوبة (*) !");
+define("FillAll", "يجب إدخال جميع الحقول!");
+define("DataIsExist", "البيانات موجودة.. يرجى إدخال بيانات جديدة!");
+define("IsNotRegistered", "المعذرة! أنت غير مسجل لدينا سابقاً.");
+define("Uploded", "تم رفع الملف بنجاح!");
+define("Commented", "تم استقبال تعليقكم وشكرا لتواصلكم!");
+define("InvalidTel", "الرجاء إدخال رقم<u>هاتف</u>صحيح! فقط الأرقام مسموحة..");
+define("InvalidMob", "الرجاء إدخال رقم<u>فاكس</u>صحيح! فقط الأرقام مسموحة.");
+define("InvalidFax", "الرجاء إدخال رقم<u>موبايل</u>صحيح! فقط الأرقام مسموحة.");
+define("InvalidMail", "الرجاء إدخال<u>بريد إلكتروني</u>صحيح!");
+define("You_can_contact_us_directly_by_filling_this_application", "للتواصل معنا مباشرة, الرجاء ملىء الاستمارة التالية!");
+ 
+ 
+define("This_helps_us_to_prevent_automatic_registration","الرجاء إدخال المحارف الظاهرة أدناه في الصورة (غير حساس لحالة الأحرف)");
+define("No_Rows_Selected","لايوجد نتائج");
+ 
+define("Set_Def_Pic","تعيين الصور الإفتراضية");
+//VCOMMENTS >>>
 define("Search","بحث");
-define("Blocked","العناوين المحجوبة");
-define("Users","المستخدمين");
-define("Save","حفظ");
-define("Enter_data","");
-define("insrt_ur_eml","");
-define("insrt_ur_eml","");
-
-define("Change_Admin_Password","تغيير كلمة السر");
-define("Signout","تسجيل خروج");
-//////////////////////////////////////////////////////////////////////////////////////////////////
-define("pid","الشخص");
-define("gid","التعميم");
-define("name","الاسم الكامل");
-define("father","الأب");
-define("mother","الأم");
-define("the_date","");
-define("address","");
-
-define("Signout","");
-define("Signout","");
+define("VComments","تعليقات الزوار");
+define("VComment_Text","نص التعليق");
+define("v_delete_question", "هل تريد بالتأكيد حذف التعليق: %s ؟");
+define("Visitor_Name","الاسم");
+//VCOMMENTS <<<
+ 
+//NAVIGATOR >>>>>>>>>>>>>>>
+define("dir", "rtl");
+define("align","right");
+define("r_align","left");
+define("Next", "التالي");
+define("Last", "الأخير");
+define("First", "الأول");
+define("Previous", "السابق");
+define("rows_found", "نتيجة");
+define("Page", "صفحة");
+define("of", "من");
+//END NAVIGATOR <<<<<<<<<<<
+ 
+/////////////////////////////////////////////////////////////////////////////
+ 
+define("Remember_Me","ابق متصلا على هذا الكمبيوتر");
+define("Thanks_Your_email_was_sent","تم ارسال رسالتك بنجاح !!");
+define("Sorry_Please_try_again_later","نأسف لحدوث خطأ .. الرجاء المحاولة لاحقاً");
+/*****   mail list   *****/
+define("Email_already_exists","ايميلك مسجل مسبقا");
+define("Added_successfully","اضيف ايميلك بنجاح");
+define("Adding_error","لقد حدث خطأ,حاول لاحقا");
+ 
+define("Change_Password","تغيير كلمة السر");
+define("Sign_UP","تسجيل حساب جديد");
+define("Sign_In","تسجيل دخول");
+define("Sign_Out","تسجيل خروج");
+ 
+//Side Bar >>>
+define("Our_Services","خدماتنا");
+define("Our_Customers","زبائننا");
+define("Download","التحميل");
+define("FAQ","الأسئلة الشائعة");
+define("Albums","ألبومات الصور");
+define("Jobs","فرص عمل");
+define("Pictures","صور الالبوم");
+//Side Bar <<<
+ 
+define("Latest_Products","آخر المنتجات");
+define("Latest_News","آخر الأخبار");
+define("All_Products","جميع المنتجات");
+define("All_News","جميع الأخبار");
+ 
+//Control_Panel >>>
+define("Control_Panel","لوحة التحكم");
+define("Users_Management","إدارة المستخدمين");
+//Control_Panel <<<
