@@ -1,5 +1,5 @@
 <?php 
-session_start();
+if(empty($_SESSION)) session_start();
 function tpl_header($title="",$mnu=false,$rel=array()) {
 	
 	//in some cases you need to be redirected to the previous page so we put it in a SESSION[prev]
@@ -23,8 +23,8 @@ function tpl_header($title="",$mnu=false,$rel=array()) {
 
 	include_once '../common/pframe.php';
 	$myfrm =new pframe();
-//if this IP address has too many failed login attempts 
-// OR copys links he doesn't has access to, will be blocked
+	//if this IP address has too many failed login attempts 
+	// OR copys links he doesn't has access to, will be blocked
 	if($myfrm->illegal_attempts('failed_login') > 10 ){	@header("location:../tpl/error.php?reason=failed_login");	}
 
 	elseif($myfrm->illegal_attempts('link_copy') > 10){	@header("location:../tpl/error.php?reason=link_copy");	}

@@ -15,6 +15,12 @@ class mysqli_connection_A {
 	private $mydb="db1";//Database Name
 	
 //configure the mysql connection with those previously mentioned attributes
-	function do_connect(){$mycon=mysqli_connect($this->myhost,$this->myuser,$this->mypass);mysqli_select_db($this->mydb,$mycon);mysqli_query("SET NAMES 'utf8'",$mycon);mysqli_query('SET CHARACTER SET utf8',$mycon);return$mycon;}
+	function do_connect(){
+		$mycon=mysqli_connect($this->myhost,$this->myuser,$this->mypass);
+		mysqli_select_db($mycon,$this->mydb);
+		mysqli_query($mycon,"SET NAMES 'utf8'");
+		mysqli_query($mycon,'SET CHARACTER SET utf8');
+		return $mycon;
+	}
 }
 ?>

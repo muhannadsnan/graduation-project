@@ -47,7 +47,7 @@ $myframe->header();     //calling the header template
 			 </div>
 			
 		     <?php	$i++;
-			}?>
+			} ?>
         <div >  <a class="prod_more" href="../pages/products.php?lang=<?=$GLOBALS['lang']?>&v=t" target="_blank"><?=All_Products?></a> </div>
     </div>
     <?php //////////////////////////////////////////////////////////////////////////////////////////////////////////////?>
@@ -79,7 +79,7 @@ $myframe->header();     //calling the header template
 					<div >  <a class="news_more" href="../pages/news.php?lang=<?=$GLOBALS['lang']?>&v=c&NID=<?=$myNews->NID['value']?>" target="_blank"><?=more?></a> </div>
 				 </div>
 		     <?php $i++;
-			}?>
+			} ?>
 			</div><!-- content -->
         <div >  <a class="news_more" href="../pages/news.php?lang=<?=$GLOBALS['lang']?>&v=t" target="_blank"><?=All_News?></a> </div>
     </div>
